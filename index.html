@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃啥：虎尾</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "微軟正黑體", sans-serif;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: #333;
+            padding: 1rem;
+            color: white;
+        }
+
+        .navbar h1 {
+            text-align: center;
+        }
+
+        .content {
+            min-height: calc(100vh - 150px);
+            padding: 2rem;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .contact-info {
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="text-align: center;">
+        <h1>今天吃啥：虎尾 </h1>
+        <h2>beta版</h2>
+    </nav>
+
+    <main class="content">
+        <style>
+            .button-group {
+                display: flex;
+                justify-content: center;
+                gap: 2rem;
+                margin-top: 2rem;
+            }
+            
+            .meal-button {
+                padding: 1rem 2rem;
+                font-size: 1.2rem;
+                border: none;
+                border-radius: 8px;
+                background-color: #4CAF50;
+                color: white;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .meal-button:hover {
+                background-color: #45a049;
+            }
+        </style>
+        <div class="button-group">
+            <button class="meal-button" onclick="showRandomRestaurant('早午餐')">早午餐</button>
+            <button class="meal-button" onclick="showRandomRestaurant('晚餐')">晚餐</button>
+            <button class="meal-button" onclick="showRandomRestaurant('宵夜')">宵夜</button>
+        </div>
+        <div id="result" style="text-align: center; margin-top: 2rem; font-size: 1.5rem;"></div>
+
+        <script>
+        function showRandomRestaurant(type) {
+            const restaurantData = {
+                '早午餐': {
+                    '1817美味廚房': 4, '棕櫚樹': 3, '亞薩': 2, '莫尼': 3, '早餐好樂': 3,
+                    '403早午餐': 3, '麥方部落': 2, '早8風味早午餐': 2, '早安山丘': 2,
+                    '蕃茄村': 4, '莫忘初衷': 3, 'MJ': 3, '阿寶早餐店': 1, '日十早午餐': 1,
+                    '樂鍋吐司': 4, '虎蛋': 3, '橘子先生': 1, '貳零貳参早午餐': 2,
+                    'L&S 早午餐': 4, '捌食光年': 2,'麥當勞': 5
+                },
+                '晚餐': {
+                    '故事咖啡': 5, '吳屋': 4, '王煮麵舖': 3, '健康那件小事': 3, '夏威夷輕食': 3,
+                    '共森': 4, '阿財火雞肉飯': 2, '大吉祥': 5, '胡同院': 5, '奇蹟便當': 2,
+                    '阿松便當': 3, '半畝田': 2, '老宋排骨': 3, '全州韓二石': 3, '王家當歸麵線': 3,
+                    '紅鶴亞': 3, '皇之香館': 2, '宮本屋': 3, '嘗湘': 4, '舒香小舖日式丼飯': 2,'麥當勞': 5
+                },
+                '宵夜': {
+                    '小樹滷味': 3, '川醉湘': 3, '虎尾赤肉羹': 3, '虎尾炸饅頭': 3, '大忠正': 2,
+                    '小中正': 2, '大塊先生': 3, '小王子': 3, '知高小吃': 4, '夜福': 4,
+                    '近魚湯': 3, '遠魚湯': 4, '格寧二二': 1, 'ㄗㄉㄨㄉ': 1, '一丿滷肉飯': 5,
+                    '京川壽司專賣店': 4, '老宋排骨': 4, '御國香': 3, '金霸臭臭鍋': 2,'麥當勞': 5
+                }
+            };
+
+            // 建立加權餐廳列表
+            const weightedList = [];
+            const data = restaurantData[type];
+            Object.entries(data).forEach(([restaurant, weight]) => {
+                for(let i = 0; i < weight; i++) {
+                    weightedList.push(restaurant);
+                }
+            });
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.animation = 'none';
+            
+            // 動畫效果
+            let count = 0;
+            const maxCount = 30;
+            let speed = 50;
+            
+            // 播放抽獎音效
+            const audio = new Audio('lottery.mp3');
+            audio.play();
+            
+            const interval = setInterval(() => {
+                const randomRestaurant = weightedList[Math.floor(Math.random() * weightedList.length)];
+                resultDiv.innerHTML = `<span style="color: ${getRandomColor()}; font-size: ${1 + count/20}em">選擇中...${randomRestaurant}</span>`;
+                
+                // 漸進減速
+                speed = Math.min(200, speed + 5);
+                
+                if (++count >= maxCount) {
+                    clearInterval(interval);
+                    // 等待音效結束後顯示結果
+                    audio.addEventListener('ended', () => {
+                        const finalRestaurant = weightedList[Math.floor(Math.random() * weightedList.length)];
+                        const weight = restaurantData[type][finalRestaurant];
+                        
+                        // 播放結果音效
+                        const dingAudio = new Audio('ding.mp3');
+                        dingAudio.play();
+                        
+                        resultDiv.innerHTML = `
+                            <div style="animation: bounce 0.5s ease-out">
+                                推薦您去：<span style="font-size: 1.8em; font-weight: bold; color: #ff4757">${finalRestaurant}</span>
+                                <br>
+                                <span style="color: #ffa502">曉芃推薦指數：${'⭐'.repeat(weight)}</span>
+                            </div>
+                        `;
+                        resultDiv.style.animation = 'resultPop 0.8s ease-out';
+                    });
+                }
+            }, speed);
+
+            // 隨機顏色函數
+            function getRandomColor() {
+                const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#8e44ad'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+        }
+        </script>
+        <style>
+        @keyframes resultPop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        </style>
+    </main>
+
+    <footer>
+        <div class="contact-info">
+            <h3>聯絡資訊</h3>
+            <p>電子郵件：tony0912345678@gmail.com</p>
+            <p>電話：0912345678</p>
+            <p>地址：雲林縣虎尾鎮曹博凱是同性戀</p>
+        </div>
+        <p>&copy 2024 今天吃啥 版權所有</p>
+    </footer>
+</body>
+</html>
